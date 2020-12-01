@@ -30,8 +30,8 @@ public class Main1 {
         try ( BufferedReader reader = new BufferedReader( new FileReader( "src/main/resources/dec01/input.txt" ) ) ) {
             return reader.lines()
                 .map( Integer::parseInt )
-                .distinct()
-                .sorted().collect( toCollection( ArrayList::new ) );
+                .sorted()
+                .collect( toCollection( ArrayList::new ) );
         }
     }
 }
