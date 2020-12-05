@@ -16,8 +16,6 @@ public class Main {
             .map( Main::toSeatId )
             .collect( toCollection( TreeSet::new ) );
 
-        System.out.println( seatIds );
-
         System.out.println( "Highest seat ID: " + seatIds.last() );
         System.out.println( "Your seat ID: " + findMissingSeatId( seatIds ) );
     }
