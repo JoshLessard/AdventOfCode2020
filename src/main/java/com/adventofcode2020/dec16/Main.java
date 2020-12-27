@@ -29,14 +29,7 @@ public class Main {
         filterValidTickets( nearbyTickets, rules )
             .forEach( validator::addTicket );
 
-        Map<TicketField, Integer> indexesByField = validator.validate();
-        long partB = indexesByField.keySet().stream()
-            .filter( f -> f.getName().startsWith( "departure" ) )
-            .map( indexesByField::get )
-            .mapToLong( myTicket::getFieldValue )
-            .reduce( 1L, (a, b) -> a * b );
-
-        System.out.println( "Part B: " + partB );
+        System.out.println( "Part B: " + getPartBValue( validator, myTicket ) );
     }
 
     private static TicketRules parseRules( List<String> input ) {
@@ -97,5 +90,14 @@ public class Main {
         return tickets.stream()
             .filter( rules::isValid )
             .collect( toList() );
+    }
+
+    private static long getPartBValue( TicketValidator validator, Ticket ticket ) {
+        Map<TicketField, Integer> indexesByField = validator.validate();
+        return indexesByField.keySet().stream()
+            .filter( f -> f.getName().startsWith( "departure" ) )
+            .map( indexesByField::get )
+            .mapToLong( ticket::getFieldValue )
+            .reduce( 1L, (a, b) -> a * b );
     }
 }
