@@ -3,6 +3,8 @@ package com.adventofcode2020.common;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 
+import java.util.Objects;
+
 public class Point {
 
     private final int x;
@@ -38,5 +40,18 @@ public class Point {
             this.x - point.x,
             this.y - point.y
         );
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Point)) return false;
+        Point point = (Point) o;
+        return x == point.x && y == point.y;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y);
     }
 }
