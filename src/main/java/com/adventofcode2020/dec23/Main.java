@@ -13,7 +13,7 @@ public class Main {
     }
 
     private static void partA() throws IOException {
-        CupCircle cups = buildCupCircle();
+        CupCircle cups = buildCupCircle( 10 );
         for ( int i = 0; i < 100; ++i ) {
             cups.takeTurn();
         }
@@ -22,7 +22,7 @@ public class Main {
     }
 
     private static void partB() throws IOException {
-        CupCircle cups = buildCupCircle();
+        CupCircle cups = buildCupCircle( 1000000 );
         for ( int cup = 10; cup <= 1000000; ++cup ) {
             cups.addCup( cup );
         }
@@ -35,8 +35,8 @@ public class Main {
         System.out.println( "Part B: " + (long) cupsAfter.get( 0 ) * cupsAfter.get( 1 ) );
     }
 
-    private static CupCircle buildCupCircle() throws IOException {
-        CupCircle cups = new CupCircle();
+    private static CupCircle buildCupCircle( int capacity ) throws IOException {
+        CupCircle cups = new CupCircle( capacity );
         String input = getInput( "src/main/resources/dec23/input.txt" ).get( 0 );
         input.chars()
             .map( c -> c - '0' )
