@@ -7,7 +7,8 @@ import java.util.stream.Stream;
 class Tile {
 
     private final int id;
-    private final int sideLength;
+    private final int numberOfRows;
+    private final int numberOfColumns;
     private final TileSpace[][] tileSpaces;
 
     private final Map<TileSide, TileSide> sideMap = new EnumMap<>( TileSide.class );
@@ -15,13 +16,23 @@ class Tile {
 
     Tile( int id, TileSpace[][] tileSpaces ) {
         this.id = id;
-        this.sideLength = tileSpaces.length;
+        this.numberOfRows = tileSpaces.length;
+        this.numberOfColumns = tileSpaces[0].length;
         this.tileSpaces = tileSpaces;
 
         sideMap.put( TileSide.TOP, TileSide.TOP );
         sideMap.put( TileSide.RIGHT, TileSide.RIGHT );
         sideMap.put( TileSide.BOTTOM, TileSide.BOTTOM );
         sideMap.put( TileSide.LEFT, TileSide.LEFT );
+    }
+
+    private Tile( int id, TileSpace[][] tileSpaces, Map<TileSide, TileSide> sideMap, boolean flippedHorizontally ) {
+        this.id = id;
+        this.numberOfRows = tileSpaces.length;
+        this.numberOfColumns = tileSpaces[0].length;
+        this.tileSpaces = tileSpaces;
+        this.sideMap.putAll( sideMap );
+        this.flippedHorizontally = flippedHorizontally;
     }
 
     int id() {
@@ -85,8 +96,28 @@ class Tile {
             .isPresent();
     }
 
-    int sideLength() {
-        return sideLength;
+    int numberOfRows() {
+        switch ( sideMap.get( TileSide.TOP ) ) {
+            case TOP:
+            case BOTTOM:
+                return numberOfRows;
+            case LEFT:
+            case RIGHT:
+                return numberOfColumns;
+        }
+        throw new IllegalStateException( "Tile's top row wasn't mapped properly." );
+    }
+
+    int numberOfColumns() {
+        switch ( sideMap.get( TileSide.TOP ) ) {
+            case TOP:
+            case BOTTOM:
+                return numberOfColumns;
+            case LEFT:
+            case RIGHT:
+                return numberOfRows;
+        }
+        throw new IllegalStateException( "Tile's top row wasn't mapped properly." );
     }
 
     TileSpace[] row( int rowIndex ) {
@@ -108,15 +139,15 @@ class Tile {
     }
 
     private TileSpace[] getRowFromTop( int rowIndex ) {
-        TileSpace[] row = new TileSpace[sideLength];
+        TileSpace[] row = new TileSpace[numberOfColumns];
         int y = rowIndex;
         int columnIndex = 0;
         if ( flippedHorizontally ) {
-            for ( int x = sideLength - 1; x >= 0; --x ) {
+            for ( int x = numberOfColumns - 1; x >= 0; --x ) {
                 row[columnIndex++] = tileSpaces[y][x];
             }
         } else {
-            for ( int x = 0; x < sideLength; ++x ) {
+            for ( int x = 0; x < numberOfColumns; ++x ) {
                 row[columnIndex++] = tileSpaces[y][x];
             }
         }
@@ -124,15 +155,15 @@ class Tile {
     }
 
     private TileSpace[] getRowFromRight( int rowIndex ) {
-        TileSpace[] row = new TileSpace[sideLength];
-        int x = sideLength - 1 - rowIndex;
+        TileSpace[] row = new TileSpace[numberOfRows];
+        int x = numberOfColumns - 1 - rowIndex;
         int columnIndex = 0;
         if ( flippedHorizontally ) {
-            for ( int y = sideLength - 1; y >= 0; --y ) {
+            for ( int y = numberOfRows - 1; y >= 0; --y ) {
                 row[columnIndex++] = tileSpaces[y][x];
             }
         } else {
-            for ( int y = 0; y < sideLength; ++y ) {
+            for ( int y = 0; y < numberOfRows; ++y ) {
                 row[columnIndex++] = tileSpaces[y][x];
             }
         }
@@ -140,15 +171,15 @@ class Tile {
     }
 
     private TileSpace[] getRowFromBottom( int rowIndex ) {
-        TileSpace[] row = new TileSpace[sideLength];
-        int y = sideLength - 1 - rowIndex;
+        TileSpace[] row = new TileSpace[numberOfColumns];
+        int y = numberOfRows - 1 - rowIndex;
         int columnIndex = 0;
         if ( flippedHorizontally ) {
-            for ( int x = 0; x < sideLength; ++x ) {
+            for ( int x = 0; x < numberOfColumns; ++x ) {
                 row[columnIndex++] = tileSpaces[y][x];
             }
         } else {
-            for ( int x = sideLength - 1; x >= 0; --x ) {
+            for ( int x = numberOfColumns - 1; x >= 0; --x ) {
                 row[columnIndex++] = tileSpaces[y][x];
             }
         }
@@ -156,27 +187,44 @@ class Tile {
     }
 
     private TileSpace[] getRowFromLeft( int rowIndex ) {
-        TileSpace[] row = new TileSpace[sideLength];
+        TileSpace[] row = new TileSpace[numberOfRows];
         int x = rowIndex;
         int columnIndex = 0;
         if ( flippedHorizontally ) {
-            for ( int y = 0; y < sideLength; ++y ) {
+            for ( int y = 0; y < numberOfRows; ++y ) {
                 row[columnIndex++] = tileSpaces[y][x];
             }
         } else {
-            for ( int y = sideLength - 1; y >= 0; --y ) {
+            for ( int y = numberOfRows - 1; y >= 0; --y ) {
                 row[columnIndex++] = tileSpaces[y][x];
             }
         }
         return row;
     }
 
+    Tile removeBorder() {
+        int newNumberOfRows = numberOfRows - 2;
+        int newNumberOfColumns = numberOfColumns - 2;
+        TileSpace[][] newTileSpaces = new TileSpace[newNumberOfRows][];
+        for ( int y = 0; y < newTileSpaces.length; ++y ) {
+            newTileSpaces[y] = new TileSpace[newNumberOfColumns];
+        }
+
+        for ( int y = 1; y < numberOfRows - 1; ++y ) {
+            for ( int x = 1; x < numberOfColumns - 1; ++x ) {
+                newTileSpaces[y - 1][x - 1] = tileSpaces[y][x];
+            }
+        }
+
+        return new Tile( id, newTileSpaces, sideMap, flippedHorizontally );
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder( "Tile " + id + ":\n" );
-        for ( int rowIndex = 0; rowIndex < sideLength; ++rowIndex ) {
+        for ( int rowIndex = 0; rowIndex < numberOfRows(); ++rowIndex ) {
             TileSpace[] row = row( rowIndex );
-            for ( int columnIndex = 0; columnIndex < sideLength; ++columnIndex ) {
+            for ( int columnIndex = 0; columnIndex < numberOfColumns(); ++columnIndex ) {
                 builder.append( row[columnIndex] );
             }
             builder.append( '\n' );

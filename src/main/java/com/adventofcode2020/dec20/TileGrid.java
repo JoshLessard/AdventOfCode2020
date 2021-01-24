@@ -2,6 +2,7 @@ package com.adventofcode2020.dec20;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Function;
 
 class TileGrid {
 
@@ -26,25 +27,38 @@ class TileGrid {
     }
 
     Tile toSingleTile() {
-        int tileLength = grid[0][0].sideLength();
-        int singleTileLength = grid.length * tileLength;
-        TileSpace[][] singleTileGrid = new TileSpace[singleTileLength][singleTileLength];
-        for ( int i = 0; i < singleTileLength; ++i ) {
-            singleTileGrid[i] = new TileSpace[singleTileLength];
-        }
-
+        int numberOfRowsInComponentTile = grid[0][0].numberOfRows();
+        int numberOfColumnsInComponentTile = grid[0][0].numberOfColumns();
+        int numberOfRows = grid.length * numberOfRowsInComponentTile;
+        int numberOfColumns = grid[0].length * numberOfColumnsInComponentTile;
+        TileSpace[][] singleTileGrid = new TileSpace[numberOfRows][numberOfColumns];
         for ( int y = 0; y < grid.length; ++y ) {
-            for ( int tileRow = 0; tileRow < tileLength; ++tileRow ) {
+            for ( int tileRow = 0; tileRow < numberOfRowsInComponentTile; ++tileRow ) {
                 int singleTileX = 0;
-                int singleTileY = y * tileLength + tileRow;
+                int singleTileY = y * numberOfRowsInComponentTile + tileRow;
                 for ( int x = 0; x < grid.length; ++x ) {
                     TileSpace[] tileSpaces = grid[y][x].row( tileRow );
                     System.arraycopy( tileSpaces, 0, singleTileGrid[singleTileY], singleTileX, tileSpaces.length );
-                    singleTileX += tileLength;
+                    singleTileX += numberOfColumnsInComponentTile;
                 }
             }
         }
 
         return new Tile( 0, singleTileGrid );
+    }
+
+    TileGrid map( Function<Tile, Tile> mapper ) {
+        Tile[][] newGrid = new Tile[grid.length][];
+        for ( int y = 0; y < grid.length; ++y ) {
+            newGrid[y] = new Tile[grid.length];
+        }
+
+        for ( int y = 0; y < grid.length; ++y ) {
+            for ( int x = 0; x < grid.length; ++x ) {
+                newGrid[y][x] = mapper.apply( grid[y][x] );
+            }
+        }
+
+        return new TileGrid( newGrid );
     }
 }

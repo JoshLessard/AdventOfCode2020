@@ -5,7 +5,8 @@ import java.util.stream.Stream;
 enum TileSpace {
 
     OCCUPIED( '#' ),
-    EMPTY( '.' );
+    EMPTY( '.' ),
+    MISSING( ' ' );
 
     private final char representation;
 
