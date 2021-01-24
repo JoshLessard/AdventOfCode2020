@@ -155,65 +155,97 @@ class Tile {
         return sideValues.containsValue( sideValue );
     }
 
+    int sideLength() {
+        return sideLength;
+    }
+
+    TileSpace[] row( int rowIndex ) {
+        switch ( sideMap.get( TileSide.TOP ) ) {
+            case TOP:
+                return getRowFromTop( rowIndex );
+            case RIGHT:
+                return getRowFromRight( rowIndex );
+            case BOTTOM:
+                return getRowFromBottom( rowIndex );
+            case LEFT:
+                return getRowFromLeft( rowIndex );
+        }
+        throw new IllegalStateException( "Tile's top row wasn't mapped properly." );
+    }
+
+    private TileSpace[] getRowFromTop( int rowIndex ) {
+        TileSpace[] row = new TileSpace[sideLength];
+        int y = rowIndex;
+        int columnIndex = 0;
+        if ( flippedHorizontally ) {
+            for ( int x = sideLength - 1; x >= 0; --x ) {
+                row[columnIndex++] = tileSpaces[y][x];
+            }
+        } else {
+            for ( int x = 0; x < sideLength; ++x ) {
+                row[columnIndex++] = tileSpaces[y][x];
+            }
+        }
+        return row;
+    }
+
+    private TileSpace[] getRowFromRight( int rowIndex ) {
+        TileSpace[] row = new TileSpace[sideLength];
+        int x = sideLength - 1 - rowIndex;
+        int columnIndex = 0;
+        if ( flippedHorizontally ) {
+            for ( int y = sideLength - 1; y >= 0; --y ) {
+                row[columnIndex++] = tileSpaces[y][x];
+            }
+        } else {
+            for ( int y = 0; y < sideLength; ++y ) {
+                row[columnIndex++] = tileSpaces[y][x];
+            }
+        }
+        return row;
+    }
+
+    private TileSpace[] getRowFromBottom( int rowIndex ) {
+        TileSpace[] row = new TileSpace[sideLength];
+        int y = sideLength - 1 - rowIndex;
+        int columnIndex = 0;
+        if ( flippedHorizontally ) {
+            for ( int x = 0; x < sideLength; ++x ) {
+                row[columnIndex++] = tileSpaces[y][x];
+            }
+        } else {
+            for ( int x = sideLength - 1; x >= 0; --x ) {
+                row[columnIndex++] = tileSpaces[y][x];
+            }
+        }
+        return row;
+    }
+
+    private TileSpace[] getRowFromLeft( int rowIndex ) {
+        TileSpace[] row = new TileSpace[sideLength];
+        int x = rowIndex;
+        int columnIndex = 0;
+        if ( flippedHorizontally ) {
+            for ( int y = 0; y < sideLength; ++y ) {
+                row[columnIndex++] = tileSpaces[y][x];
+            }
+        } else {
+            for ( int y = sideLength - 1; y >= 0; --y ) {
+                row[columnIndex++] = tileSpaces[y][x];
+            }
+        }
+        return row;
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder( "Tile " + id + ":\n" );
-        switch ( sideMap.get( TileSide.TOP ) ) {
-            case TOP:
-                for ( int y = 0; y < sideLength; ++y ) {
-                    if ( flippedHorizontally ) {
-                        for ( int x = sideLength - 1; x >= 0; --x ) {
-                            builder.append( tileSpaces[y][x] );
-                        }
-                    } else {
-                        for ( int x = 0; x < sideLength; ++x ) {
-                            builder.append( tileSpaces[y][x] );
-                        }
-                    }
-                    builder.append( '\n' );
-                }
-                break;
-            case RIGHT:
-                for ( int x = sideLength - 1; x >= 0; --x ) {
-                    if ( flippedHorizontally ) {
-                        for ( int y = sideLength - 1; y >= 0; --y ) {
-                            builder.append( tileSpaces[y][x] );
-                        }
-                    } else {
-                        for ( int y = 0; y < sideLength; ++y ) {
-                            builder.append( tileSpaces[y][x] );
-                        }
-                    }
-                    builder.append( '\n' );
-                }
-                break;
-            case BOTTOM:
-                for ( int y = sideLength - 1; y >= 0; --y ) {
-                    if ( flippedHorizontally ) {
-                        for ( int x = 0; x < sideLength; ++x ) {
-                            builder.append( tileSpaces[y][x] );
-                        }
-                    } else {
-                        for ( int x = sideLength - 1; x >= 0; --x ) {
-                            builder.append( tileSpaces[y][x] );
-                        }
-                    }
-                    builder.append( '\n' );
-                }
-                break;
-            case LEFT:
-                for ( int x = 0; x < sideLength; ++x ) {
-                    if ( flippedHorizontally ) {
-                        for ( int y = 0; y < sideLength; ++y ) {
-                            builder.append( tileSpaces[y][x] );
-                        }
-                    } else {
-                        for ( int y = sideLength - 1; y >= 0; --y ) {
-                            builder.append( tileSpaces[y][x] );
-                        }
-                    }
-                    builder.append( '\n' );
-                }
+        for ( int rowIndex = 0; rowIndex < sideLength; ++rowIndex ) {
+            TileSpace[] row = row( rowIndex );
+            for ( int columnIndex = 0; columnIndex < sideLength; ++columnIndex ) {
+                builder.append( row[columnIndex] );
+            }
+            builder.append( '\n' );
         }
         return builder.toString();
     }

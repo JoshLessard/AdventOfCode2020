@@ -132,4 +132,27 @@ class TileGrid {
     private boolean hasSingleMatchingTile( int sideValue ) {
         return tilesBySideValue.get( sideValue ).size() == 1;
     }
+
+    Tile toSingleTile() {
+        int tileLength = grid[0][0].sideLength();
+        int singleTileLength = grid.length * tileLength;
+        TileSpace[][] singleTileGrid = new TileSpace[singleTileLength][singleTileLength];
+        for ( int i = 0; i < singleTileLength; ++i ) {
+            singleTileGrid[i] = new TileSpace[singleTileLength];
+        }
+
+        for ( int y = 0; y < grid.length; ++y ) {
+            for ( int tileRow = 0; tileRow < tileLength; ++tileRow ) {
+                int singleTileX = 0;
+                int singleTileY = y * tileLength + tileRow;
+                for ( int x = 0; x < grid.length; ++x ) {
+                    TileSpace[] tileSpaces = grid[y][x].row( tileRow );
+                    System.arraycopy( tileSpaces, 0, singleTileGrid[singleTileY], singleTileX, tileSpaces.length );
+                    singleTileX += tileLength;
+                }
+            }
+        }
+
+        return new Tile( 0, singleTileGrid );
+    }
 }

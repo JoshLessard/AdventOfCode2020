@@ -14,6 +14,6 @@ public class Main {
 
         System.out.println( "Part A: " + grid.cornerIds().stream().mapToLong( Integer::longValue ).reduce( 1, (a, b) -> a * b ) );
 
-        System.out.println( grid );
+        System.out.println( grid.toSingleTile() );
     }
 }
