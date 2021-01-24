@@ -12,7 +12,7 @@ class Tile {
     private final Map<TileSide, Integer> sideComplementValues = new EnumMap<>( TileSide.class );
 
     private final Map<TileSide, TileSide> sideMap = new EnumMap<>( TileSide.class );
-    private boolean flipped = false;
+    private boolean flippedHorizontally = false;
 
     Tile( int id, TileSpace[][] tileSpaces ) {
         this.id = id;
@@ -59,32 +59,32 @@ class Tile {
 
     private TileSpace[] getTop() {
         TileSpace[] top = new TileSpace[sideLength];
-        for ( int i = 0; i < sideLength; ++i ) {
-            top[i] = tileSpaces[0][i];
+        for ( int x = 0; x < sideLength; ++x ) {
+            top[x] = tileSpaces[0][x];
         }
         return top;
     }
 
     private TileSpace[] getRight() {
         TileSpace[] right = new TileSpace[sideLength];
-        for ( int i = 0; i < sideLength; ++i ) {
-            right[i] = tileSpaces[i][sideLength - 1];
+        for ( int y = 0; y < sideLength; ++y ) {
+            right[y] = tileSpaces[y][sideLength - 1];
         }
         return right;
     }
 
     private TileSpace[] getBottom() {
         TileSpace[] bottom = new TileSpace[sideLength];
-        for ( int i = 0; i < sideLength; ++i ) {
-            bottom[i] = tileSpaces[sideLength - 1][sideLength - i - 1];
+        for ( int x = 0; x < sideLength; ++x ) {
+            bottom[x] = tileSpaces[sideLength - 1][sideLength - x - 1];
         }
         return bottom;
     }
 
     private TileSpace[] getLeft() {
         TileSpace[] left = new TileSpace[sideLength];
-        for ( int i = 0; i < sideLength; ++i ) {
-            left[i] = tileSpaces[sideLength - i - 1][0];
+        for ( int y = 0; y < sideLength; ++y ) {
+            left[y] = tileSpaces[sideLength - y - 1][0];
         }
         return left;
     }
@@ -148,7 +148,7 @@ class Tile {
         TileSide oldMappedLeftSide = sideMap.get( TileSide.LEFT );
         sideMap.put( TileSide.LEFT, sideMap.get( TileSide.RIGHT ) );
         sideMap.put( TileSide.RIGHT, oldMappedLeftSide );
-        flipped = ! flipped;
+        flippedHorizontally = ! flippedHorizontally;
     }
 
     boolean hasSideValue( int sideValue ) {
@@ -160,23 +160,60 @@ class Tile {
         StringBuilder builder = new StringBuilder( "Tile " + id + ":\n" );
         switch ( sideMap.get( TileSide.TOP ) ) {
             case TOP:
-                for ( int x = 0; x < sideLength; ++x ) {
-                    for ( int y = 0; y < sideLength; ++y ) {
-                        builder.append( tileSpaces[x][y] );
+                for ( int y = 0; y < sideLength; ++y ) {
+                    if ( flippedHorizontally ) {
+                        for ( int x = sideLength - 1; x >= 0; --x ) {
+                            builder.append( tileSpaces[y][x] );
+                        }
+                    } else {
+                        for ( int x = 0; x < sideLength; ++x ) {
+                            builder.append( tileSpaces[y][x] );
+                        }
                     }
                     builder.append( '\n' );
                 }
                 break;
             case RIGHT:
-                
-            case BOTTOM:
                 for ( int x = sideLength - 1; x >= 0; --x ) {
-                    for ( int y = sideLength - 1; y >= 0; --y ) {
-                        builder.append( tileSpaces[x][y] );
+                    if ( flippedHorizontally ) {
+                        for ( int y = sideLength - 1; y >= 0; --y ) {
+                            builder.append( tileSpaces[y][x] );
+                        }
+                    } else {
+                        for ( int y = 0; y < sideLength; ++y ) {
+                            builder.append( tileSpaces[y][x] );
+                        }
                     }
                     builder.append( '\n' );
                 }
                 break;
+            case BOTTOM:
+                for ( int y = sideLength - 1; y >= 0; --y ) {
+                    if ( flippedHorizontally ) {
+                        for ( int x = 0; x < sideLength; ++x ) {
+                            builder.append( tileSpaces[y][x] );
+                        }
+                    } else {
+                        for ( int x = sideLength - 1; x >= 0; --x ) {
+                            builder.append( tileSpaces[y][x] );
+                        }
+                    }
+                    builder.append( '\n' );
+                }
+                break;
+            case LEFT:
+                for ( int x = 0; x < sideLength; ++x ) {
+                    if ( flippedHorizontally ) {
+                        for ( int y = 0; y < sideLength; ++y ) {
+                            builder.append( tileSpaces[y][x] );
+                        }
+                    } else {
+                        for ( int y = sideLength - 1; y >= 0; --y ) {
+                            builder.append( tileSpaces[y][x] );
+                        }
+                    }
+                    builder.append( '\n' );
+                }
         }
         return builder.toString();
     }

@@ -83,10 +83,10 @@ class TileGrid {
     }
 
     private void addToGrid( Tile tile, int x, int y ) {
-        if ( grid[x][y] != null ) {
+        if ( grid[y][x] != null ) {
             throw new IllegalArgumentException( "Grid location (" + x + ", " + y + ") is already occupied." );
         }
-        grid[x][y] = tile;
+        grid[y][x] = tile;
         tileLocationsById.put( tile.id(), new Point( x, y ) );
         Stream.of( TileSide.values() )
             .forEach( s -> evictSideValue( tile, s ) );
