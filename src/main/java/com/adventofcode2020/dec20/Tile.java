@@ -1,8 +1,13 @@
 package com.adventofcode2020.dec20;
 
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
+
+import com.adventofcode2020.common.Delta;
+import com.adventofcode2020.common.Point;
 
 class Tile {
 
@@ -217,6 +222,69 @@ class Tile {
         }
 
         return new Tile( id, newTileSpaces, sideMap, flippedHorizontally );
+    }
+
+    Set<Point> occupiedPointsMatching( Tile patternTile ) {
+        Set<Point> points = new HashSet<>();
+        int numberOfPatternTileRows = patternTile.numberOfRows();
+        int numberOfPatternTileColumns = patternTile.numberOfColumns();
+
+        for ( int y = 0; y < numberOfRows() - numberOfPatternTileRows + 1; ++y ) {
+            for ( int x = 0; x < numberOfColumns() - numberOfPatternTileColumns + 1; ++x ) {
+                Tile subTile = getSubTile( x, y, numberOfPatternTileColumns, numberOfPatternTileRows );
+                if ( subTile.allOccupiedSpacesMatch( patternTile ) ) {
+                    Delta deltaFromPatternTile = new Delta( x, y );
+                    patternTile.getCoordinatesOfAll( TileSpace.OCCUPIED ).stream()
+                        .map( p -> p.transform( deltaFromPatternTile ) )
+                        .forEach( points::add );
+                }
+            }
+        }
+
+        return points;
+    }
+
+    private Tile getSubTile( int startX, int startY, int numberOfColumns, int numberOfRows ) {
+        TileSpace[][] subGrid = new TileSpace[numberOfRows][numberOfColumns];
+        for ( int y = startY; y < startY + numberOfRows; ++y ) {
+            TileSpace[] sourceRow = row( y );
+            TileSpace[] destinationRow = subGrid[y - startY];
+            System.arraycopy( sourceRow, startX, destinationRow, 0, numberOfColumns );
+        }
+        return new Tile( 0, subGrid );
+    }
+
+    private boolean allOccupiedSpacesMatch( Tile patternTile ) {
+        if ( numberOfRows() != patternTile.numberOfRows() || numberOfColumns() != patternTile.numberOfColumns() ) {
+            throw new IllegalArgumentException( "Pattern tile should have same dimensions as this tile." );
+        }
+        for ( int y = 0; y < numberOfRows(); ++y ) {
+            TileSpace[] myRow = row( y );
+            TileSpace[] patternRow = patternTile.row( y );
+            for ( int x = 0; x < myRow.length; ++x ) {
+                if ( patternRow[x] == TileSpace.OCCUPIED && myRow[x] != TileSpace.OCCUPIED ) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private Set<Point> getCoordinatesOfAll( TileSpace tileSpace ) {
+        Set<Point> coordinates = new HashSet<>();
+        for ( int y = 0; y < numberOfRows(); ++y ) {
+            TileSpace[] row = row( y );
+            for ( int x = 0; x < row.length; ++x ) {
+                if ( row[x] == tileSpace ) {
+                    coordinates.add( new Point( x, y ) );
+                }
+            }
+        }
+        return coordinates;
+    }
+
+    int numberOfSpacesMatching( TileSpace tileSpace ) {
+        return getCoordinatesOfAll( tileSpace ).size();
     }
 
     @Override

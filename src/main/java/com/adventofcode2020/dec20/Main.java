@@ -5,6 +5,7 @@ import static com.adventofcode2020.common.InputUtilities.getInput;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import com.adventofcode2020.common.Point;
 
@@ -28,6 +29,17 @@ public class Main {
             new Point( 16, 2 )
     );
 
+    private static final List<Consumer<Tile>> SEA_MONSTER_TRANSFORMERS = List.of(
+        t -> {},
+        Tile::rotateClockwise,
+        Tile::rotateClockwise,
+        Tile::rotateClockwise,
+        Tile::flipHorizontally,
+        Tile::rotateClockwise,
+        Tile::rotateClockwise,
+        Tile::rotateClockwise
+    );
+
     public static void main( String[] args ) throws IOException {
         List<Tile> tiles = new TileParser().parseTiles( getInput( "src/main/resources/dec20/input.txt" ).iterator() );
         TileGrid grid = new TileGridBuilder( tiles ).build();
@@ -36,7 +48,16 @@ public class Main {
         Tile gridAsSingleTile = grid.map( Tile::removeBorder ).toSingleTile();
         Tile seaMonsterTile = createSeaMonsterTile();
 
-        System.out.println( gridAsSingleTile );
+        for ( Consumer<Tile> transformer : SEA_MONSTER_TRANSFORMERS ) {
+            transformer.accept( seaMonsterTile );
+            Set<Point> matchingSeaMonsterCoordinates = gridAsSingleTile.occupiedPointsMatching( seaMonsterTile );
+            if ( ! matchingSeaMonsterCoordinates.isEmpty() ) {
+                int numberOfSeaMonstersSpaces = matchingSeaMonsterCoordinates.size();
+                int roughness = gridAsSingleTile.numberOfSpacesMatching( TileSpace.OCCUPIED ) - numberOfSeaMonstersSpaces;
+                System.out.println( "Part B: " + roughness );
+                break;
+            }
+        }
     }
 
     private static Tile createSeaMonsterTile() {
