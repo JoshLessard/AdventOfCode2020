@@ -17,8 +17,8 @@ public class Main {
         long cardLoopSize = getLoopSize( SUBJECT_NUMBER, cardPublicKey );
         long doorLoopSize = getLoopSize( SUBJECT_NUMBER, doorPublicKey );
 
-        long encryptionKey1 = transform( 1L, cardPublicKey, doorLoopSize );
-        long encryptionKey2 = transform( 1L, doorPublicKey, cardLoopSize );
+        long encryptionKey1 = transform( cardPublicKey, doorLoopSize );
+        long encryptionKey2 = transform( doorPublicKey, cardLoopSize );
 
         if ( encryptionKey1 != encryptionKey2 ) {
             throw new IllegalStateException( "Encryption keys do not match." );
@@ -32,19 +32,20 @@ public class Main {
         long loopSize = 0L;
         while ( value != publicKey ) {
             ++loopSize;
-            value = transform( value, subjectNumber );
+            value = transformStep( value, subjectNumber );
         }
         return loopSize;
     }
 
-    private static long transform( long value, long subjectNumber, long loopSize ) {
+    private static long transform( long subjectNumber, long loopSize ) {
+        long value = 1L;
         for ( long i = 0L; i < loopSize; ++i ) {
-            value = transform( value, subjectNumber );
+            value = transformStep( value, subjectNumber );
         }
         return value;
     }
 
-    private static long transform( long value, long subjectNumber ) {
+    private static long transformStep( long value, long subjectNumber ) {
         value *= subjectNumber;
         return value % 20201227;
     }
